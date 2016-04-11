@@ -6,26 +6,63 @@
 #include <proto/dos.h>
 #include <proto/exec.h>
 
+#define EXIT_SUCCESS 0
+#define EXIT_SYNTAX_ERROR 20
 #define EXIT_DOS_ERROR 30
+
+#define ARG_FILE	0
+#define ARG_ADDRESS	1
+
+static const STRPTR version = "\0$VER: load2mem 1.0 (11.04.2016)\0";
+static const STRPTR id = "\0$Id$\0";
+
+ULONG file_size(BYTE *path);
+BOOL file_load(BYTE *path, BYTE *filebuf, ULONG filesize);
+void usage(void);
+
+void
+usage(void)
+{
+	printf("load2mem FILE/K ADDRESS/K\n");
+}
 
 int
 main(int argc, char *argv[])
 {
+	static LONG *argArray;
 	struct RDArgs *result;
-/*
-	CONST_STRPTR argTemplate =
 
-	filebuf = (char*) strtol(argv[2], NULL, 16);
+	ULONG size;
+	BYTE *buf, *path;
 
-	printf("file is %ld bytes long, will load at %p\n", (long) statbuf.st_size, filebuf);
-*/
+	CONST_STRPTR argTemplate = "FILE/K,ADDRESS/K";
+
+	if ((LONG) argArray[ARG_FILE] == 0) {
+		usage();
+		return EXIT_SYNTAX_ERROR;
+	}
+	if ((LONG) argArray[ARG_ADDRESS] == 0) {
+		usage();
+		return EXIT_SYNTAX_ERROR;
+	}
+
+	path = (STRPTR) argArray[ARG_FILE];
+
+	size = file_size(path);
+	buf = (BYTE*) strtol((STRPTR) argArray[ARG_ADDRESS], NULL, 16);
+
+	printf("file is %lu bytes long, will load at %p\n", size, buf);
+
+	file_load(path, buf, size);
+
+	return EXIT_SUCCESS; 
 }
 
 ULONG
 file_size(BYTE *path)
 { 
 	BPTR file;
-	LONG size;
+	ULONG size;
 	struct FileInfoBlock *fib;
 	struct Library *DOSBase;
 
