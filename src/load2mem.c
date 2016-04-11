@@ -10,6 +10,7 @@
 #define EXIT_SYNTAX_ERROR 20
 #define EXIT_DOS_ERROR 30
 
+#define ARGNUM		2
 #define ARG_FILE	0
 #define ARG_ADDRESS	1
 
@@ -36,6 +37,9 @@ main(int argc, char *argv[])
 	BYTE *buf, *path;
 
 	CONST_STRPTR argTemplate = "FILE/K,ADDRESS/K";
+
+	argArray = AllocVec(ARGNUM*sizeof(LONG), MEMF_ANY|MEMF_CLEAR);
+	result = ReadArgs(argTemplate, argArray, NULL);
 
 	if ((LONG) argArray[ARG_FILE] == 0) {
 		usage();
